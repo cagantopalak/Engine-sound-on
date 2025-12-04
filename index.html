@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cagant - Engine sound LSD mode</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="grainy-gradient-container" id="bgContainer">
+      <div class="ui-layer" id="uiLayer">
+        <div id="overlay">
+          <h1>TEST:PSYCHEDELIC</h1>
+          <div class="subtitle">Warning: Flashing Lights</div>
+          <button class="start-btn" id="startBtn">INITIALIZE</button>
+        </div>
+
+        <div id="interface" style="display: none">
+          <h1>TEST:PSYCHEDELIC</h1>
+          <h1>ENGINE ACTIVE</h1>
+          <div class="readout"><span id="valDisplay">0.00</span></div>
+
+          <div class="slider-container">
+            <input
+              type="range"
+              id="throttle"
+              min="0"
+              max="1"
+              step="0.001"
+              value="0"
+            />
+          </div>
+
+          <div class="helper-text">SLIDE TO MAX FOR HYPERDRIVE</div>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
