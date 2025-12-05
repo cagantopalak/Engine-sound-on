@@ -8,6 +8,9 @@
 
       let audioCtx;
       let carrier, modulator, modulatorGain, masterGain;
+      // Vibration controls for mobile devices
+      let vibrateTimer = null;
+      let lastVibKey = '';
       let currentThrottleVal = 0;
       let frameCount = 0; // To track time for cycling colors
 
@@ -40,6 +43,11 @@
         overlay.style.display = "none";
         interfaceDiv.style.display = "block";
 
+        // Stop any previous vibration when starting fresh
+        if (navigator && navigator.vibrate) {
+          navigator.vibrate(0);
+        }
+
         requestAnimationFrame(visualLoop);
         throttleInput.value = 0;
         updateEngine(0);
@@ -48,6 +56,9 @@
       function updateEngine(value) {
         const val = parseFloat(value);
         currentThrottleVal = val;
+
+        // Update vibration based on throttle
+        updateVibration(val);
 
         valDisplay.innerText = val.toFixed(2);
 
@@ -63,6 +74,53 @@
         carrier.frequency.setTargetAtTime(baseFreq, now, 0.1);
         modulator.frequency.setTargetAtTime(wobbleSpeed, now, 0.1);
       }
+
+      // Vibration mapping: stronger throttle -> longer buzz and shorter gaps
+      function updateVibration(val) {
+        if (!('vibrate' in navigator)) return;
+
+        // Consider very small values as off
+        if (val <= 0.01) {
+          if (vibrateTimer) {
+            clearInterval(vibrateTimer);
+            vibrateTimer = null;
+          }
+          navigator.vibrate(0);
+          lastVibKey = '';
+          return;
+        }
+
+        // Map throttle (0..1) to vibration duration and pause
+        const intensity = Math.min(Math.max(val, 0), 1);
+        const duration = Math.round(30 + intensity * 170); // 30ms..200ms
+        const pause = Math.round(200 - intensity * 180); // 200ms..20ms
+
+        // Use a key so we only recreate interval when params change
+        const key = duration + '_' + pause;
+        if (key === lastVibKey && vibrateTimer) return;
+        lastVibKey = key;
+
+        if (vibrateTimer) {
+          clearInterval(vibrateTimer);
+          vibrateTimer = null;
+        }
+
+        // Repeatedly call vibrate with a simple pattern [vibrate, pause]
+        // interval length is sum of both so pattern repeats continuously
+        vibrateTimer = setInterval(() => {
+          // Call once per cycle — some browsers may merge repeated calls
+          navigator.vibrate([duration, pause]);
+        }, duration + pause);
+      }
+
+      // Ensure vibration is stopped on page unload
+      window.addEventListener('beforeunload', () => {
+        if (vibrateTimer) {
+          clearInterval(vibrateTimer);
+          vibrateTimer = null;
+        }
+        if (navigator && navigator.vibrate) navigator.vibrate(0);
+      });
 
       // --- THE "ACID" LOOP ---
       function visualLoop() {
