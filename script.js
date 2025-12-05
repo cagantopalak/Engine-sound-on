@@ -43,9 +43,9 @@
         overlay.style.display = "none";
         interfaceDiv.style.display = "block";
 
-        // Stop any previous vibration when starting fresh
+        // Prime vibration permission by doing a short vibration on the user gesture
         if (navigator && navigator.vibrate) {
-          navigator.vibrate(0);
+          try { navigator.vibrate(10); } catch (e) { /* ignore */ }
         }
 
         requestAnimationFrame(visualLoop);
@@ -176,6 +176,12 @@
 
       startBtn.addEventListener("click", () => {
         initAudio();
+        // Also start vibration mapping from the same user gesture to avoid browser blocks
+        try {
+          updateVibration(parseFloat(throttleInput.value || 0));
+        } catch (e) {
+          // ignore if updateVibration isn't ready
+        }
       });
 
       throttleInput.addEventListener("input", (e) => {
