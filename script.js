@@ -56,6 +56,7 @@
       function updateEngine(value) {
         const val = parseFloat(value);
         currentThrottleVal = val;
+        throttleInput.parentElement.style.setProperty("--val", val);
 
         // Update vibration based on throttle
         updateVibration(val);
